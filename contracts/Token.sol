@@ -47,6 +47,7 @@ contract Token is TokenMath {
     mapping(address => mapping(address => uint)) allowed;
     event Transfer(address indexed from, address indexed to, uint tokens);
     event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
+    event Burn(address indexed burner, uint256 amount);
 
     constructor() {
         symbol = "3DAO";
@@ -99,6 +100,14 @@ contract Token is TokenMath {
     }
     function allowance(address tokenOwner, address spender) public view returns (uint remaining) {
         return allowed[tokenOwner][spender];
+    }
+
+    function burn(uint256 amount) external {
+        require(balances[msg.sender] >= amount, "insufficient balance");
+        balances[msg.sender] = safeSub(balances[msg.sender], amount);
+        _totalSupply = safeSub(_totalSupply, amount);
+        emit Burn(msg.sender, amount);
+        emit Transfer(msg.sender, address(0), amount);
     }
 
 
